@@ -9,6 +9,12 @@ import android.os.Build
 import de.fishare.lumosble.SingletonHolder
 import android.media.AudioManager
 import android.media.ToneGenerator
+import android.os.Handler
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import de.fishare.lumosble.print
 
 class NotificationManager private constructor(var context : Context) {
     companion object : SingletonHolder<NotificationManager, Context>(::NotificationManager) {
@@ -45,7 +51,26 @@ class NotificationManager private constructor(var context : Context) {
     }
 
     fun sendMail(){
+//        https@ //script.google.com/macros/s/AKfycbxHBZqYqsF84kffNpgZMTEhFSP-MeXaXmK55kbk3y_sahl2kAYS/exec?to=yaoyu@fishare.de&lat=22&lng=122
+        val urlAPI = "https://script.google.com/macros/s/AKfycbxHBZqYqsF84kffNpgZMTEhFSP-MeXaXmK55kbk3y_sahl2kAYS/exec"
+        val to = "?to=" + "yaoyu@fishare.de"
+        val lat = "&lat=" + "22.22"
+        val lng = "&lng=" + "122.22"
+        val url = urlAPI + to + lat + lng
+        val queue = Volley.newRequestQueue(context)
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            Response.Listener<String> { response ->
+                print(TAG, response)
+            },
+            Response.ErrorListener {
+                print(TAG, "error!!!!")
+            })
+        stringRequest.tag = "mail"
+        queue.add(stringRequest)
 
+        //cancel all sending mail attempt after 15s
+        Handler().postDelayed({ queue.cancelAll("mail") }, 15000)
     }
 
 }

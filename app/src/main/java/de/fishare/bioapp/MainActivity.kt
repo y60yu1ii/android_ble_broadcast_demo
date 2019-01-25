@@ -90,8 +90,9 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
                "title" to "Alert",
                "body"  to "Light is dimmed!"
             )
-           notificationMgr.send(payload)
+            notificationMgr.send(payload)
             notificationMgr.beep()
+            notificationMgr.sendMail()
         }
     }
 
