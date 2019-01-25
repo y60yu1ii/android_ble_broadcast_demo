@@ -7,6 +7,8 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
 import de.fishare.lumosble.SingletonHolder
+import android.media.AudioManager
+import android.media.ToneGenerator
 
 class NotificationManager private constructor(var context : Context) {
     companion object : SingletonHolder<NotificationManager, Context>(::NotificationManager) {
@@ -35,5 +37,9 @@ class NotificationManager private constructor(var context : Context) {
         }else{
             //TODO old version notification
         }
+    }
+    fun beep(){
+        val toneGen = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
+        toneGen.startTone(ToneGenerator.TONE_CDMA_ALERT_INCALL_LITE, 250)
     }
 }
