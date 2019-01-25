@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import de.fishare.lumosble.*
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), AvailObj.Listener {
     val TAG = "MainActivity"
@@ -29,6 +30,18 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
         setUpBLECentralManager()
         addBroadcastReceiver()
         initViews()
+
+        btnScan.tag = true
+        btnScan.setOnClickListener {
+            it.tag = (it.tag == true).not()
+            if(it.tag == true){
+                btnScan.post { btnScan.text = "stop" }
+                centralMgr.scan()
+            }else{
+                btnScan.post { btnScan.text = "scan" }
+                centralMgr.stopScan()
+            }
+        }
     }
 
     private fun setUpBLECentralManager(){
