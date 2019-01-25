@@ -1,1 +1,1 @@
-# adnroid ble broadcast demo for NCKU BME Bio APP workshop
+# An Android BLE Broadcast demo for NCKU BME Bio APP workshop
