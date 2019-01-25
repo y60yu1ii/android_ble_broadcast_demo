@@ -38,8 +38,11 @@ class NotificationManager private constructor(var context : Context) {
             //TODO old version notification
         }
     }
+
     fun beep(){
         val toneGen = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
         toneGen.startTone(ToneGenerator.TONE_CDMA_ALERT_INCALL_LITE, 250)
     }
+
+
 }
