@@ -96,7 +96,6 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
         }
     }
 
-
     /**
      *  Broadcast relative
      *
