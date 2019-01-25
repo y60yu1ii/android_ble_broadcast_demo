@@ -44,5 +44,8 @@ class NotificationManager private constructor(var context : Context) {
         toneGen.startTone(ToneGenerator.TONE_CDMA_ALERT_INCALL_LITE, 250)
     }
 
+    fun sendMail(){
+
+    }
 
 }
