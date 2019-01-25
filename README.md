@@ -1,1 +1,3 @@
-# An Android BLE Broadcast demo for NCKU BME Bio APP workshop
+# An Android BLE Demo 
+- branch BROADCAST for broadcast demo
+- branch UART for uart demo
