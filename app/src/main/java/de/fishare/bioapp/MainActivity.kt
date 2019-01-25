@@ -10,16 +10,18 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import de.fishare.lumosble.*
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), AvailObj.Listener {
+class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
     val TAG = "MainActivity"
     lateinit var recyclerView : RecyclerView
     val centralMgr by lazy { CentralManagerBuilder(listOf()).build(this)}
     val notificationMgr by lazy { NotificationManager.getInstance(this) }
     var avails = listOf<DemoAvail>()
+    var peris = listOf<DemoPeri>()
     private lateinit var adapter: EasyListAdapter
     private var viewModel = ViewModel()
 
@@ -61,6 +63,10 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
                 return DemoAvail(device)
             }
 
+            override fun getCustomObj(mac: String, name: String): PeriObj {
+                return DemoPeri(mac)
+            }
+
         }
         centralMgr.loadHistory()
         centralMgr.checkPermit(this)
@@ -69,6 +75,9 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
     private fun refreshAvail(){
         avails = centralMgr.avails.map { it as DemoAvail }
         avails.forEach { it.listener = this@MainActivity }
+
+        peris = centralMgr.peris.map { it as DemoPeri }
+        peris.forEach { it.listener = this@MainActivity }
     }
 
 /**
@@ -89,6 +98,30 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
             val payload = mapOf(
                "title" to "Alert",
                "body"  to "Light is dimmed!"
+            )
+            notificationMgr.send(payload)
+//            notificationMgr.beep()
+//            notificationMgr.sendMail()
+        }
+    }
+
+    /**
+     * notify handler
+     **/
+    override fun onRSSIChanged(rssi: Int, periObj: PeriObj) {
+        val vh = getCustomItemOfPeri(periObj.mac)
+        if(vh != null){ viewModel.update(vh, periObj as DemoPeri) }
+    }
+
+    //on Data Update changed of avail
+    override fun onUpdated(label: String, value: Any, periObj: PeriObj) {
+//        print(TAG, "${availObj.name} update $label with ${value}")
+        val vh = getCustomItemOfPeri(periObj.mac)
+        if(vh != null){ viewModel.update(vh, periObj as DemoPeri) }
+        if(label == "lumenData" && (value as Int) < 50 ){
+            val payload = mapOf(
+                "title" to "Alert",
+                "body"  to "Light is dimmed!"
             )
             notificationMgr.send(payload)
 //            notificationMgr.beep()
@@ -141,19 +174,23 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
             override fun numberOfRowIn(section: Int): Int {
                 return when(section){
                     0 -> avails.count()
+                    1 -> peris.count()
                     else -> 0
                 }
             }
 
             override fun numberOfSection(): Int {
-                return 1
+                return 2
             }
 
             override fun onBindOfRow(vh: RecyclerView.ViewHolder, indexPath: EasyListAdapter.IndexPath) {
                 if(indexPath.section == 0 && indexPath.row < avails.size){
-                    val avl = avails[indexPath.row]
                     runOnUiThread {
-                        viewModel.setUpView(vh as CustomItem, avl)
+                        viewModel.setUpView(vh as CustomItem, avails[indexPath.row])
+                    }
+                }else if(indexPath.section == 1 && indexPath.row < peris.size){
+                    runOnUiThread {
+                        viewModel.setUpView(vh as CustomItem, peris[indexPath.row])
                     }
                 }
             }
@@ -163,6 +200,44 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
                 return CustomItem(view)
             }
         }//data source
+
+        adapter.listener = object : EasyListAdapter.ItemEvent{
+            override fun onItemClick(view: View, indexPath: EasyListAdapter.IndexPath) {
+                when(view.id){
+                    R.id.btnAction -> {
+                        print(TAG, "[EVENT] action button is click ")
+                        when(indexPath.section){
+                            1 -> {
+                                if(indexPath.row < peris.size){
+                                    val peri = peris[indexPath.row]
+                                    peri?.write("%1")
+                                }
+                            }
+                        }
+
+                    }
+                    R.id.btnConnect -> {
+                        print(TAG, "[EVENT] connect button is click ")
+                        val vh = getCustomItem(indexPath)
+                        when(indexPath.section){
+                            0 ->{
+                                if(indexPath.row < avails.size){
+                                    vh?.btnConnect?.post { vh.btnConnect.text = "connecting" }
+                                    centralMgr.connect(avails[indexPath.row].mac)
+                                }
+                            }
+
+                            1 ->{
+                                if(indexPath.row < peris.size){
+                                    vh?.btnConnect?.post { vh.btnConnect.text = "removing" }
+                                    centralMgr.remove(peris[indexPath.row].mac)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -178,6 +253,16 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
     private fun getAvailIdx(mac:String):Int?{
         val idx = avails.indexOfFirst { it.mac == mac }
         return if(idx < avails.size && idx >= 0) idx else null
+    }
+
+    private fun getCustomItemOfPeri(mac: String):CustomItem?{
+        val idx = getPeriIdx(mac)
+        return if(idx != null) getCustomItem(EasyListAdapter.IndexPath(0, idx)) else null
+    }
+
+    private fun getPeriIdx(mac:String):Int?{
+        val idx = peris.indexOfFirst { it.mac == mac }
+        return if(idx < peris.size && idx >= 0) idx else null
     }
 
     private fun getCustomItem(indexPath: EasyListAdapter.IndexPath):CustomItem?{

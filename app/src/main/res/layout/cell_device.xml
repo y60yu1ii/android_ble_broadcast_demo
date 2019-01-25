@@ -55,18 +55,27 @@
                       android:layout_height="match_parent"
                       android:orientation="vertical"
                       android:gravity="center"
+                      android:layout_alignParentEnd="true"
         >
+            <Button
+                    android:layout_width="80dp"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:background="@android:color/background_dark"
+                    android:id="@+id/btnConnect"
+                    android:textColor="@android:color/white"
+                    android:text="CONNECT"
+                    android:layout_margin = "10dp"
+            />
+            <Button
+                    android:layout_width="80dp"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:background="@android:color/background_dark"
+                    android:id="@+id/btnAction"
+                    android:textColor="@android:color/white"
+                    android:text="Action"
+                    android:layout_margin="10dp"
+            />
         </LinearLayout>
-    <Button
-            android:layout_width="80dp"
-            android:layout_height="30dp"
-            android:gravity="center"
-            android:background="@android:color/background_dark"
-            android:id="@+id/btnConnect"
-            android:textColor="@android:color/white"
-            android:text="CONNECT"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"
-    />
 </RelativeLayout>
