@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
     val TAG = "MainActivity"
     lateinit var recyclerView : RecyclerView
     val centralMgr by lazy { CentralManagerBuilder(listOf()).build(this)}
+    val notificationMgr by lazy { NotificationManager.getInstance(this) }
     var avails = listOf<DemoAvail>()
     private lateinit var adapter: EasyListAdapter
     private var viewModel = ViewModel()
@@ -71,6 +72,13 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
 //        print(TAG, "${availObj.name} update $label with ${value}")
         val vh = getCustomItemOfAvail(availObj.mac)
         if(vh != null){ viewModel.update(vh, availObj as DemoAvail) }
+        if(label == "lumenData" && (value as Int) < 200 ){
+            val payload = mapOf(
+               "title" to "Alert",
+               "body"  to "Light is dimmed!"
+            )
+           notificationMgr.send(payload)
+        }
     }
 
 
