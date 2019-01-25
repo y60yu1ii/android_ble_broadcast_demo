@@ -5,8 +5,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -85,14 +85,14 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener {
 //        print(TAG, "${availObj.name} update $label with ${value}")
         val vh = getCustomItemOfAvail(availObj.mac)
         if(vh != null){ viewModel.update(vh, availObj as DemoAvail) }
-        if(label == "lumenData" && (value as Int) < 200 ){
+        if(label == "lumenData" && (value as Int) < 50 ){
             val payload = mapOf(
                "title" to "Alert",
                "body"  to "Light is dimmed!"
             )
             notificationMgr.send(payload)
-            notificationMgr.beep()
-            notificationMgr.sendMail()
+//            notificationMgr.beep()
+//            notificationMgr.sendMail()
         }
     }
 

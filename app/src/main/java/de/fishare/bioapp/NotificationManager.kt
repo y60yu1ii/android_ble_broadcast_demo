@@ -1,20 +1,24 @@
 package de.fishare.bioapp
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.content.Context
-import android.content.Intent
+import android.content.Context.LOCATION_SERVICE
 import android.graphics.BitmapFactory
-import android.os.Build
-import de.fishare.lumosble.SingletonHolder
+import android.location.LocationManager
 import android.media.AudioManager
 import android.media.ToneGenerator
+import android.os.Build
 import android.os.Handler
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import de.fishare.lumosble.SingletonHolder
 import de.fishare.lumosble.print
+
+
 
 class NotificationManager private constructor(var context : Context) {
     companion object : SingletonHolder<NotificationManager, Context>(::NotificationManager) {
@@ -54,8 +58,9 @@ class NotificationManager private constructor(var context : Context) {
 //        https@ //script.google.com/macros/s/AKfycbxHBZqYqsF84kffNpgZMTEhFSP-MeXaXmK55kbk3y_sahl2kAYS/exec?to=yaoyu@fishare.de&lat=22&lng=122
         val urlAPI = "https://script.google.com/macros/s/AKfycbxHBZqYqsF84kffNpgZMTEhFSP-MeXaXmK55kbk3y_sahl2kAYS/exec"
         val to = "?to=" + "yaoyu@fishare.de"
-        val lat = "&lat=" + "22.22"
-        val lng = "&lng=" + "122.22"
+        val gps = getLocation()
+        val lat = "&lat=" + gps["lat"]
+        val lng = "&lng=" + gps["lng"]
         val url = urlAPI + to + lat + lng
         val queue = Volley.newRequestQueue(context)
         val stringRequest = StringRequest(
@@ -71,6 +76,25 @@ class NotificationManager private constructor(var context : Context) {
 
         //cancel all sending mail attempt after 15s
         Handler().postDelayed({ queue.cancelAll("mail") }, 15000)
+    }
+
+    //never mind, we already have the permission granted by lumos ble(coarse location)
+    @SuppressLint("MissingPermission")
+    fun getLocation():Map<String, Double>{
+        val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
+        val location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        return if(location != null){
+            mapOf(
+                "lat" to location.latitude,
+                "lng" to location.longitude
+            )
+        }else{
+            mapOf(
+                "lat" to 0.0,
+                "lng" to 0.0
+            )
+
+        }
     }
 
 }
