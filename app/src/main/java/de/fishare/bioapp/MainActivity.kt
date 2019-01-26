@@ -86,20 +86,20 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
     //on RSSI changed of avail
     override fun onRSSIChanged(rssi: Int, availObj: AvailObj) {
         val vh = getCustomItemOfAvail(availObj.mac)
-        if(vh != null){ viewModel.update(vh, availObj as DemoAvail) }
+        if(vh != null){ viewModel.update(vh, availObj as DemoAvail, adapter) }
     }
 
     //on Data Update changed of avail
     override fun onUpdated(label: String, value: Any, availObj: AvailObj) {
 //        print(TAG, "${availObj.name} update $label with ${value}")
         val vh = getCustomItemOfAvail(availObj.mac)
-        if(vh != null){ viewModel.update(vh, availObj as DemoAvail) }
+        if(vh != null){ viewModel.update(vh, availObj as DemoAvail, adapter) }
         if(label == "lumenData" && (value as Int) < 50 ){
             val payload = mapOf(
                "title" to "Alert",
                "body"  to "Light is dimmed!"
             )
-            notificationMgr.send(payload)
+//            notificationMgr.send(payload)
 //            notificationMgr.beep()
 //            notificationMgr.sendMail()
         }
@@ -110,14 +110,14 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
      **/
     override fun onRSSIChanged(rssi: Int, periObj: PeriObj) {
         val vh = getCustomItemOfPeri(periObj.mac)
-        if(vh != null){ viewModel.update(vh, periObj as DemoPeri) }
+        if(vh != null){ viewModel.update(vh, periObj as DemoPeri, adapter) }
     }
 
     //on Data Update changed of avail
     override fun onUpdated(label: String, value: Any, periObj: PeriObj) {
 //        print(TAG, "${availObj.name} update $label with ${value}")
         val vh = getCustomItemOfPeri(periObj.mac)
-        if(vh != null){ viewModel.update(vh, periObj as DemoPeri) }
+        if(vh != null){ viewModel.update(vh, periObj as DemoPeri, adapter) }
         if(label == "lumenData" && (value as Int) < 50 ){
             val payload = mapOf(
                 "title" to "Alert",
@@ -186,11 +186,11 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
             override fun onBindOfRow(vh: RecyclerView.ViewHolder, indexPath: EasyListAdapter.IndexPath) {
                 if(indexPath.section == 0 && indexPath.row < avails.size){
                     runOnUiThread {
-                        viewModel.setUpView(vh as CustomItem, avails[indexPath.row])
+                        viewModel.setUpView(vh as CustomItem, avails[indexPath.row], adapter, indexPath)
                     }
                 }else if(indexPath.section == 1 && indexPath.row < peris.size){
                     runOnUiThread {
-                        viewModel.setUpView(vh as CustomItem, peris[indexPath.row])
+                        viewModel.setUpView(vh as CustomItem, peris[indexPath.row], adapter, indexPath)
                     }
                 }
             }
