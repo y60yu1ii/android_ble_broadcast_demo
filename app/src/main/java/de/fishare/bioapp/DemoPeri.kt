@@ -11,12 +11,12 @@ class DemoPeri (mac: String): PeriObj(mac){
     private var handler = Handler()
 
     override fun authAndSubscribe(){
+        writeTo("ffc1", "PQD".toByteArray())
+        writeTo("ffc2", "111111".toByteArray())
+        writeTo("ffc3", byteArrayOf(0x01))
+        controller?.subscribeTo("ffe1")
         super.authAndSubscribe()
         print(TAG, "auth and start")
-        handler.postDelayed({
-            print(TAG, "subscribe to tx")
-            controller?.subscribeTo(tx)
-        }, 2000)
     }
 
     fun write(cmd:String){

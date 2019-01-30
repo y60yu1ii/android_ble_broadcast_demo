@@ -50,13 +50,12 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
         centralMgr.event = object : CentralManager.EventListener {
             override fun didDiscover(availObj: AvailObj) {
 //                print(TAG, "list size ${avails.count()} Found ${availObj.mac} data is ${availObj.rawData.hex4Human()}")
-                refreshAvail()
-                runOnUiThread { adapter.reload() }
+                refreshAll()
             }
         }
         centralMgr.setting = object :CentralManager.Setting{
             override fun getNameRule(): String {
-                return "(LBLE)-[a-zA-Z0-9]{0,5}"
+                return "(BUDDY)-[a-zA-Z0-9]{4,7}"
             }
 
             override fun getCustomAvl(device: BluetoothDevice): AvailObj {
@@ -72,12 +71,14 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
         centralMgr.checkPermit(this)
     }
 
-    private fun refreshAvail(){
+    private fun refreshAll(){
         avails = centralMgr.avails.map { it as DemoAvail }
         avails.forEach { it.listener = this@MainActivity }
 
         peris = centralMgr.peris.map { it as DemoPeri }
         peris.forEach { it.listener = this@MainActivity }
+
+        runOnUiThread { adapter.reload() }
     }
 
 /**
@@ -119,11 +120,11 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
         val vh = getCustomItemOfPeri(periObj.mac)
         if(vh != null){ viewModel.update(vh, periObj as DemoPeri, adapter) }
         if(label == "lumenData" && (value as Int) < 50 ){
-            val payload = mapOf(
-                "title" to "Alert",
-                "body"  to "Light is dimmed!"
-            )
-            notificationMgr.send(payload)
+//            val payload = mapOf(
+//                "title" to "Alert",
+//                "body"  to "Light is dimmed!"
+//            )
+//            notificationMgr.send(payload)
 //            notificationMgr.beep()
 //            notificationMgr.sendMail()
         }
@@ -140,10 +141,18 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
                     val mac = intent.getStringExtra("mac") ?: ""
                     val isConnected = intent.getBooleanExtra("connected", false)
                     print(TAG, "$mac is ${if(isConnected) "CONNECT" else "DISCONNECT" }")
-                    refreshAvail()
+                    refreshAll()
+
+                    if(isConnected.not()){
+                        val payload = mapOf(
+                            "title" to "Disconnect",
+                            "body"  to "$mac is disconnected."
+                        )
+                        notificationMgr.send(payload)
+                    }
                 }
                 REFRESH_EVENT->{
-                    refreshAvail()
+                    refreshAll()
                     centralMgr.clearOutdateAvl()
                 }
             }
