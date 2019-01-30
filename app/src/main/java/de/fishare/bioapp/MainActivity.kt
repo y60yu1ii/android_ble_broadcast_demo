@@ -54,9 +54,6 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
             }
         }
         centralMgr.setting = object :CentralManager.Setting{
-            override fun getNameRule(): String {
-                return "(BUDDY)-[a-zA-Z0-9]{4,7}"
-            }
 
             override fun getCustomAvl(device: BluetoothDevice): AvailObj {
                 return DemoAvail(device)
