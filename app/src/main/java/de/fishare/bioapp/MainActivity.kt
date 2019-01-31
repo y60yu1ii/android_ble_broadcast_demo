@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
     val TAG = "MainActivity"
     lateinit var recyclerView : RecyclerView
     val centralMgr by lazy { CentralManagerBuilder(listOf()).build(this)}
-    val notificationMgr by lazy { NotificationManager.getInstance(this) }
+    val notificationMgr by lazy { NotifCenter.getInstance(this) }
     var avails = listOf<DemoAvail>()
     var peris = listOf<DemoPeri>()
     private lateinit var adapter: EasyListAdapter
@@ -84,14 +84,14 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
     //on RSSI changed of avail
     override fun onRSSIChanged(rssi: Int, availObj: AvailObj) {
         val vh = getCustomItemOfAvail(availObj.mac)
-        if(vh != null){ viewModel.update(vh, availObj as DemoAvail, adapter) }
+        if(vh != null){ viewModel.update(availObj as DemoAvail, vh) }
     }
 
     //on Data Update changed of avail
     override fun onUpdated(label: String, value: Any, availObj: AvailObj) {
 //        print(TAG, "${availObj.name} update $label with ${value}")
         val vh = getCustomItemOfAvail(availObj.mac)
-        if(vh != null){ viewModel.update(vh, availObj as DemoAvail, adapter) }
+        if(vh != null){ viewModel.update(availObj as DemoAvail, vh) }
         if(label == "lumenData" && (value as Int) < 50 ){
             val payload = mapOf(
                "title" to "Alert",
@@ -108,14 +108,14 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
      **/
     override fun onRSSIChanged(rssi: Int, periObj: PeriObj) {
         val vh = getCustomItemOfPeri(periObj.mac)
-        if(vh != null){ viewModel.update(vh, periObj as DemoPeri, adapter) }
+        if(vh != null){ viewModel.update(periObj as DemoPeri, vh) }
     }
 
     //on Data Update changed of avail
     override fun onUpdated(label: String, value: Any, periObj: PeriObj) {
 //        print(TAG, "${availObj.name} update $label with ${value}")
         val vh = getCustomItemOfPeri(periObj.mac)
-        if(vh != null){ viewModel.update(vh, periObj as DemoPeri, adapter) }
+        if(vh != null){ viewModel.update(periObj as DemoPeri, vh) }
         if(label == "lumenData" && (value as Int) < 50 ){
 //            val payload = mapOf(
 //                "title" to "Alert",
@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
     private val receiver = object : BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
             when(intent?.action){
-                CONNECTION_EVENT->{
+                Event.CONNECTION->{
                     val mac = intent.getStringExtra("mac") ?: ""
                     val isConnected = intent.getBooleanExtra("connected", false)
                     print(TAG, "$mac is ${if(isConnected) "CONNECT" else "DISCONNECT" }")
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
                         notificationMgr.send(payload)
                     }
                 }
-                REFRESH_EVENT->{
+                Event.REFRESH->{
                     refreshAll()
                     centralMgr.clearOutdateAvl()
                 }
@@ -158,8 +158,8 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
 
     private fun addBroadcastReceiver(){
         val filter = IntentFilter().apply {
-            addAction(CONNECTION_EVENT)
-            addAction(REFRESH_EVENT)
+            addAction(Event.CONNECTION)
+            addAction(Event.REFRESH)
         }
         registerReceiver(receiver, filter)
         isRegistered = true
@@ -192,11 +192,11 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
             override fun onBindOfRow(vh: RecyclerView.ViewHolder, indexPath: EasyListAdapter.IndexPath) {
                 if(indexPath.section == 0 && indexPath.row < avails.size){
                     runOnUiThread {
-                        viewModel.setUpView(vh as CustomItem, avails[indexPath.row], adapter, indexPath)
+                        viewModel.setUpViewFor(avails[indexPath.row], vh as CustomItem, adapter, indexPath)
                     }
                 }else if(indexPath.section == 1 && indexPath.row < peris.size){
                     runOnUiThread {
-                        viewModel.setUpView(vh as CustomItem, peris[indexPath.row], adapter, indexPath)
+                        viewModel.setUpViewFor(peris[indexPath.row], vh as CustomItem, adapter, indexPath)
                     }
                 }
             }
@@ -263,7 +263,7 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
 
     private fun getCustomItemOfPeri(mac: String):CustomItem?{
         val idx = getPeriIdx(mac)
-        return if(idx != null) getCustomItem(EasyListAdapter.IndexPath(0, idx)) else null
+        return if(idx != null) getCustomItem(EasyListAdapter.IndexPath(1, idx)) else null
     }
 
     private fun getPeriIdx(mac:String):Int?{

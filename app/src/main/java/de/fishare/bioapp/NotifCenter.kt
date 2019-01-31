@@ -20,9 +20,9 @@ import de.fishare.lumosble.print
 
 
 
-class NotificationManager private constructor(var context : Context) {
-    companion object : SingletonHolder<NotificationManager, Context>(::NotificationManager) {
-        private const val TAG = "NotificationManager"
+class NotifCenter private constructor(var context : Context) {
+    companion object : SingletonHolder<NotifCenter, Context>(::NotifCenter) {
+        private const val TAG = "NotifCenter"
     }
     private val chanelID = "chanelID"
     private val notifID   = 9627
@@ -30,23 +30,22 @@ class NotificationManager private constructor(var context : Context) {
     fun send(dict:Map<String, String>){
         val r = context.resources
         val icon = BitmapFactory.decodeResource(r, R.mipmap.ic_launcher)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notification = Notification.Builder(context, chanelID).apply {
-                setContentTitle(dict["title"])
-                setContentText(dict["body"])
-                setSmallIcon(R.mipmap.ic_launcher_round)
-                setLargeIcon(icon)
-                setAutoCancel(true)
-            }.build()
+        val mNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val builder = Notification.Builder(context).apply {
+            setContentTitle(dict["title"])
+            setContentText(dict["body"])
+            setSmallIcon(R.mipmap.ic_launcher_round)
+            setLargeIcon(icon)
+            setAutoCancel(true)
+        }
 
-            val mNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val importance = android.app.NotificationManager.IMPORTANCE_HIGH
             val mChannel = NotificationChannel(chanelID, r.getString(R.string.app_name), importance)
             mNotificationManager.createNotificationChannel(mChannel)
-            mNotificationManager.notify(notifID, notification)
-        }else{
-            //TODO old version notification
+            builder.setChannelId(chanelID)
         }
+        mNotificationManager.notify(notifID, builder.build())
     }
 
     fun beep(){
@@ -55,7 +54,6 @@ class NotificationManager private constructor(var context : Context) {
     }
 
     fun sendMail(){
-//        https@ //script.google.com/macros/s/AKfycbxHBZqYqsF84kffNpgZMTEhFSP-MeXaXmK55kbk3y_sahl2kAYS/exec?to=yaoyu@fishare.de&lat=22&lng=122
         val urlAPI = "https://script.google.com/macros/s/AKfycbxHBZqYqsF84kffNpgZMTEhFSP-MeXaXmK55kbk3y_sahl2kAYS/exec"
         val to = "?to=" + "yaoyu@fishare.de"
         val gps = getLocation()

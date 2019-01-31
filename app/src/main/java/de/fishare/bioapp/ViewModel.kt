@@ -5,27 +5,27 @@ import android.view.View
 import kotlinx.android.synthetic.main.cell_device.view.*
 
 class ViewModel {
-   fun setUpView(v:CustomItem, avl: DemoAvail, adapter:EasyListAdapter, indexPath:EasyListAdapter.IndexPath){
+   fun setUpViewFor(avl: DemoAvail, v:CustomItem, adapter:EasyListAdapter, indexPath:EasyListAdapter.IndexPath){
       v.lblName.text = avl.name
       v.lblMac.text  = avl.mac
       v.btnConnect.setOnClickListener { adapter.listener?.onItemClick(it, indexPath) }
       v.btnAction.setOnClickListener { adapter.listener?.onItemClick(it, indexPath) }
    }
 
-   fun setUpView(v:CustomItem, peri: DemoPeri, adapter:EasyListAdapter, indexPath: EasyListAdapter.IndexPath){
+   fun setUpViewFor(peri: DemoPeri, v:CustomItem, adapter:EasyListAdapter, indexPath: EasyListAdapter.IndexPath){
       v.lblName.text = peri.name
       v.lblMac.text  = peri.mac
       v.btnConnect.setOnClickListener { adapter.listener?.onItemClick(it, indexPath) }
       v.btnAction.setOnClickListener { adapter.listener?.onItemClick(it, indexPath) }
    }
 
-   fun update(v:CustomItem, peri:DemoPeri, adapter:EasyListAdapter) {
+   fun update(peri:DemoPeri, v:CustomItem) {
 //      v.lblData.text  = avl.rawData.hex4Human()
       v.lblData.text  = peri.lumenData.toString()
       v.lblRSSI.text  = peri.rssi.toString()
    }
 
-   fun update(v:CustomItem, avl:DemoAvail, adapter:EasyListAdapter) {
+   fun update(avl:DemoAvail, v:CustomItem) {
 //      v.lblData.text  = avl.rawData.hex4Human()
       v.lblData.text  = avl.lumenData.toString()
       v.lblRSSI.text  = avl.rssi.toString()
