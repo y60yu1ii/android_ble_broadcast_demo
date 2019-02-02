@@ -24,6 +24,8 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
     var peris = listOf<DemoPeri>()
     private lateinit var adapter: EasyListAdapter
     private var viewModel = ViewModel()
+    val AVAIL_TYPE = 0
+    val PERI_TYPE =1
 
     private var isRegistered = false
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,14 +85,14 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
  **/
     //on RSSI changed of avail
     override fun onRSSIChanged(rssi: Int, availObj: AvailObj) {
-        val vh = getCustomItemOfAvail(availObj.mac)
+        val vh = getCustomItemOf(AVAIL_TYPE, availObj.mac)
         if(vh != null){ viewModel.update(availObj as DemoAvail, vh) }
     }
 
     //on Data Update changed of avail
     override fun onUpdated(label: String, value: Any, availObj: AvailObj) {
 //        print(TAG, "${availObj.name} update $label with ${value}")
-        val vh = getCustomItemOfAvail(availObj.mac)
+        val vh = getCustomItemOf(AVAIL_TYPE, availObj.mac)
         if(vh != null){ viewModel.update(availObj as DemoAvail, vh) }
         if(label == "lumenData" && (value as Int) < 50 ){
             val payload = mapOf(
@@ -107,14 +109,14 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
      * notify handler
      **/
     override fun onRSSIChanged(rssi: Int, periObj: PeriObj) {
-        val vh = getCustomItemOfPeri(periObj.mac)
+        val vh = getCustomItemOf(PERI_TYPE, periObj.mac)
         if(vh != null){ viewModel.update(periObj as DemoPeri, vh) }
     }
 
     //on Data Update changed of avail
     override fun onUpdated(label: String, value: Any, periObj: PeriObj) {
 //        print(TAG, "${availObj.name} update $label with ${value}")
-        val vh = getCustomItemOfPeri(periObj.mac)
+        val vh = getCustomItemOf(PERI_TYPE, periObj.mac)
         if(vh != null){ viewModel.update(periObj as DemoPeri, vh) }
         if(label == "lumenData" && (value as Int) < 50 ){
 //            val payload = mapOf(
@@ -251,25 +253,22 @@ class MainActivity : AppCompatActivity(), AvailObj.Listener, PeriObj.Listener {
 
     }//init views
 
-    private fun getCustomItemOfAvail(mac: String):CustomItem?{
-        val idx = getAvailIdx(mac)
+    private fun getCustomItemOf(type:Int, mac: String):CustomItem?{
+        val idx = getIdxOf(type, mac)
         return if(idx != null) getCustomItem(EasyListAdapter.IndexPath(0, idx)) else null
     }
 
-    private fun getAvailIdx(mac:String):Int?{
-        val idx = avails.indexOfFirst { it.mac == mac }
-        return if(idx < avails.size && idx >= 0) idx else null
+    private fun getIdxOf(type:Int, mac:String):Int?{
+        if(type == AVAIL_TYPE){
+            val idx = avails.indexOfFirst { it.mac == mac }
+            return if(idx < avails.size && idx >= 0) idx else null
+        }else if(type == PERI_TYPE){
+            val idx = peris.indexOfFirst { it.mac == mac }
+            return if(idx < peris.size && idx >= 0) idx else null
+        }
+        return null
     }
 
-    private fun getCustomItemOfPeri(mac: String):CustomItem?{
-        val idx = getPeriIdx(mac)
-        return if(idx != null) getCustomItem(EasyListAdapter.IndexPath(1, idx)) else null
-    }
-
-    private fun getPeriIdx(mac:String):Int?{
-        val idx = peris.indexOfFirst { it.mac == mac }
-        return if(idx < peris.size && idx >= 0) idx else null
-    }
 
     private fun getCustomItem(indexPath: EasyListAdapter.IndexPath):CustomItem?{
         val position = adapter.getPositionOf(indexPath)
